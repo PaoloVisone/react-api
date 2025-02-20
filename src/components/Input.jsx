@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+// Importo axios
+import axios from "axios";
 
 // Array di articoli
 const listArticles = [
@@ -61,6 +63,16 @@ export default function input() {
     // Inserimento nuovo articolo
     const [newArticle, setNewArticle] = useState(articleData);
 
+
+    // funzione di gestione chiamata all'API
+    function fetchArticles() {
+        axios.get("http://localhost:3000/posts")
+            .then((res) => setListArticles(res.data))
+
+
+    }
+
+
     //Funzione per gestire il form
     function handleData(e) {
         // Gestione del checkbox
@@ -73,7 +85,6 @@ export default function input() {
             [e.target.title]: value,
         }))
 
-        // setNewArticle('');
     }
 
     // Funzione per aggiungere gli articoli 
