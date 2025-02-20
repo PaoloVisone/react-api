@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 // Importo axios
 import axios from "axios";
 
@@ -48,18 +48,19 @@ const listArticles = [
 
 // Variabile iniziale dell'articolo
 const articleData = {
-    titolo: "",
-    autore: "",
-    contenuto: "",
-    categoria: "",
-    disponibile: false
+    id: "",
+    title: "",
+    slug: "",
+    content: "",
+    image: "",
+    tags: ""
 }
 
 
 export default function input() {
 
     // Stato dell'articolo
-    const [articles, setListArticles] = useState(listArticles);
+    const [articles, setListArticles] = useState([]);
     // Inserimento nuovo articolo
     const [newArticle, setNewArticle] = useState(articleData);
 
@@ -67,10 +68,10 @@ export default function input() {
     // funzione di gestione chiamata all'API
     function fetchArticles() {
         axios.get("http://localhost:3000/posts")
-            .then((res) => setListArticles(res.data))
-
-
+            .then((res) =>
+                setListArticles(res.data))
     }
+    useEffect(fetchArticles, []);
 
 
     //Funzione per gestire il form
@@ -83,28 +84,36 @@ export default function input() {
         setNewArticle((newArticle) => ({
             ...newArticle,
             [e.target.title]: value,
-        }))
-
+        }
+        )
+        )
     }
 
     // Funzione per aggiungere gli articoli 
     // Con id giusto
     function handleSubmit(e) {
         e.preventDefault();
-        setListArticles((articles) => [...articles,
-        {
-            id: articles.length === 0 ? 1 : articles[articles.length - 1].id + 1,
-            ...newArticle
-        }]);
+        setListArticles(
+            (articles) =>
+                [...articles,
+                {
+                    id: articles.length === 0 ? 1 : articles[articles.length - 1].id + 1,
+                    ...newArticle
+                }
+                ]
+        );
+
         // resetto il form
         setNewArticle(articleData);
     }
 
     // Cancello articolo
     function deleteArticle(idArticle) {
-        const updatedArticle = articles.filter((article) => {
-            return article.id !== idArticle
-        });
+        const updatedArticle = articles.filter(
+            (article) => {
+                return article.id !== idArticle
+            }
+        );
         setListArticles(updatedArticle);
     }
 
@@ -120,8 +129,8 @@ export default function input() {
                         <h1>INSERISCI IL TUO ARTICOLO</h1>
                         <input
                             type="text"
-                            title="titolo"
-                            value={newArticle.titolo}
+                            title="title"
+                            value={newArticle.title}
                             onChange={handleData}
                             placeholder="Titolo"
                             required
@@ -129,19 +138,19 @@ export default function input() {
 
                         <input
                             type="text"
-                            title="autore"
-                            value={newArticle.autore}
+                            title="slug"
+                            value={newArticle.slug}
                             onChange={handleData}
-                            placeholder="Autore"
+                            placeholder="Slug"
                             required
                         />
 
                         <input
                             type="text"
-                            title="categoria"
-                            value={newArticle.categoria}
+                            title="content"
+                            value={newArticle.content}
                             onChange={handleData}
-                            placeholder="Categoria"
+                            placeholder="Content"
                             required
                         />
 
@@ -182,13 +191,13 @@ export default function input() {
                     <div id="content-art">
                         {articles.map((article) => (
 
-                            <div className="post" key={article.id}>
+                            <div className="article-list" key={article.id}>
 
-                                <h3>{article.titolo}</h3>
-                                <h4>{article.autore}</h4>
-                                <p id="contenuto">{article.contenuto}</p>
-                                <span id="categoria">{article.categoria}</span>
-                                <p id="disponibile">{article.disponibile ? "Disponibile" : "Non disponibile!"}</p>
+                                <img src={article.image} alt={article.title} />
+                                <h3>{article.title}</h3>
+                                <h4>{article.slug}</h4>
+                                <p id="contenuto">{article.content}</p>
+                                <span id="categoria">{article.tags}</span>
 
 
                                 {/* Delete button */}
