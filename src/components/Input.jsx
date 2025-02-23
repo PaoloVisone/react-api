@@ -1,65 +1,22 @@
 import { useState, useEffect } from "react";
-// Importo axios
-import axios from "axios";
 
-// Array di articoli
-const listArticles = [
-    {
-        id: 1,
-        titolo: "La bellezza della natura",
-        autore: "Giulia Bianchi",
-        contenuto: "La natura è un dono prezioso, che ci offre paesaggi mozzafiato e momenti di serenità.",
-        categoria: "Natura",
-        disponibile: true
-    },
-    {
-        id: 2,
-        titolo: "L'importanza della lettura",
-        autore: "Marco Rossi",
-        contenuto: "La lettura è uno degli strumenti più potenti per crescere e conoscere il mondo.",
-        categoria: "Cultura",
-        disponibile: true
-    },
-    {
-        id: 3,
-        titolo: "Tecnologie del futuro",
-        autore: "Luca Verdi",
-        contenuto: "L'intelligenza artificiale e la robotica stanno cambiando il nostro modo di vivere.",
-        categoria: "Tecnologia",
-        disponibile: true
-    },
-    {
-        id: 4,
-        titolo: "Viaggiare in Italia",
-        autore: "Sara Neri",
-        contenuto: "L'Italia offre una varietà incredibile di destinazioni turistiche per tutti i gusti.",
-        categoria: "Viaggi",
-        disponibile: false
-    },
-    {
-        id: 5,
-        titolo: "La cucina mediterranea",
-        autore: "Antonio Esposito",
-        contenuto: "La cucina mediterranea è famosa per la sua freschezza e i suoi sapori unici.",
-        categoria: "Cucina",
-        disponibile: true
-    }
-];
+// Importo axios
+import axios from "axios"
 
 // Variabile iniziale dell'articolo
 const articleData = {
     id: "",
     title: "",
-    slug: "",
-    content: "",
     image: "",
-    tags: ""
+    content: "",
+    tags: []
 }
 
+// export default function input() {
 
-export default function input() {
+const Input = () => {
 
-    // Stato dell'articolo
+    // Stato dell'articolo (gestisce l'arrey di articoli)
     const [articles, setListArticles] = useState([]);
     // Inserimento nuovo articolo
     const [newArticle, setNewArticle] = useState(articleData);
@@ -71,37 +28,44 @@ export default function input() {
             .then((res) =>
                 setListArticles(res.data))
     }
+    // richiamo la funzione di richiesta dati al caricamento del componente
     useEffect(fetchArticles, []);
 
 
-    //Funzione per gestire il form
+    //Funzione per gestire i campi 
     function handleData(e) {
-        // Gestione del checkbox
-        const value =
-            e.target.type === "checkbox" ?
-                e.target.checked : e.target.value;
+        // gestione del value a seconda del tipo di input
+        const value = e.target.title === "tags" ? e.target.value.split(",") : e.target.value;
 
-        setNewArticle((newArticle) => ({
-            ...newArticle,
+        setNewArticle((currentNewArticle) => ({
+            ...currentNewArticle,
             [e.target.title]: value,
-        }
-        )
-        )
+        }));
     }
 
-    // Funzione per aggiungere gli articoli 
-    // Con id giusto
+    // Funzione il submit del form
     function handleSubmit(e) {
         e.preventDefault();
-        setListArticles(
-            (articles) =>
-                [...articles,
-                {
-                    id: articles.length === 0 ? 1 : articles[articles.length - 1].id + 1,
-                    ...newArticle
-                }
-                ]
-        );
+
+        // chiamata verso la API in post con invio dati nuova pizza
+        axios.post("http://localhost:3000/posts", newArticle)
+            .then((res) => {
+                // uso la risposta dell'API per creare il nuovo array
+                setListArticles((articles) => [...articles, res.data])
+            }
+            )
+            .catch(err => console.log(err))
+
+
+        // setListArticles(
+        //     (articles) =>
+        //         [...articles,
+        //         {
+        //             id: articles.length === 0 ? 1 : articles[articles.length - 1].id + 1,
+        //             ...newArticle
+        //         }
+        //         ]
+        // );
 
         // resetto il form
         setNewArticle(articleData);
@@ -124,9 +88,10 @@ export default function input() {
 
                 <div id="input-box">
 
+                    <h1>INSERISCI IL TUO ARTICOLO</h1>
 
-                    <form onSubmit={handleSubmit}>
-                        <h1>INSERISCI IL TUO ARTICOLO</h1>
+                    <form action="#" onSubmit={handleSubmit}>
+
                         <input
                             type="text"
                             title="title"
@@ -138,37 +103,24 @@ export default function input() {
 
                         <input
                             type="text"
-                            title="slug"
-                            value={newArticle.slug}
+                            title="image"
+                            value={newArticle.image}
                             onChange={handleData}
-                            placeholder="Slug"
-                            required
+                            placeholder="Imagine"
                         />
 
                         <input
                             type="text"
-                            title="content"
-                            value={newArticle.content}
+                            title="tags"
+                            value={newArticle.tags}
                             onChange={handleData}
-                            placeholder="Content"
-                            required
-                        />
-
-
-                        <label htmlFor="disponibile">Disponibile</label>
-                        <input
-                            type="checkbox"
-                            title="disponibile"
-                            checked={newArticle.disponibile}
-                            onChange={handleData}
-                            id="disponibile"
-                            required
+                            placeholder="Tags"
                         />
 
                         <textarea
                             type="text"
-                            title="contenuto"
-                            value={newArticle.contenuto}
+                            title="content"
+                            value={newArticle.content}
                             onChange={handleData}
                             placeholder="Contenuto..."
                             required
@@ -185,35 +137,36 @@ export default function input() {
 
                 {/* Se non ci sono articoli */}
 
-                {articles.length === 0 ?
-                    <h2>Non ci sono articoli</h2>
-                    :
-                    <div id="content-art">
-                        {articles.map((article) => (
+                {
+                    articles.length === 0 ?
+                        <h2>Non ci sono articoli</h2>
+                        :
+                        <div id="content-art">
+                            {articles.map((article) => (
 
-                            <div className="article-list" key={article.id}>
+                                <div className="article-list" key={article.id}>
 
-                                <img src={article.image} alt={article.title} />
-                                <h3>{article.title}</h3>
-                                <h4>{article.slug}</h4>
-                                <p id="contenuto">{article.content}</p>
-                                <span id="categoria">{article.tags}</span>
+                                    <h3>{article.title}</h3>
+                                    <img src={article.image} alt={article.title} />
+                                    <p>{article.content}</p>
+                                    <span>{article.tags.join(", ")}</span>
 
+                                    {/* Delete button */}
+                                    <div className="content-btn">
+                                        <button className="btn" onClick={() => deleteArticle(article.id)}>
+                                            Elimina
+                                        </button>
+                                    </div>
 
-                                {/* Delete button */}
-                                <div className="content-btn">
-                                    <button className="btn" onClick={() => deleteArticle(article.id)}>
-                                        Elimina
-                                    </button>
                                 </div>
-
-                            </div>
-                        ))
-                        }
-                    </div>
+                            ))
+                            }
+                        </div>
                 }
             </div >
         </>
     )
 
 }
+
+export default Input
